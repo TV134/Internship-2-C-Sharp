@@ -1,24 +1,20 @@
 ﻿using System.Collections.Concurrent;
+using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace aplikacija
 {
     internal class Program
     {
-        static void Main(string[] args)
-        {
-
-            DateTime now=new DateTime(2024,6,15);
-            Console.WriteLine(now.ToString("dd/MM/yyyy"));
-
-            var users= new Dictionary<int, Tuple<string,string,DateTime,List<int>>>
+        static Dictionary<int, Tuple<string, string, DateTime, List<int>>> users = new Dictionary<int, Tuple<string, string, DateTime, List<int>>>
             {
                 {1, new Tuple<string, string, DateTime, List<int>>("Ana","Anić",new DateTime(2000,12,15),new List<int>{1,2,3})},
                 {2, new Tuple<string, string, DateTime, List<int>>("Mate","Matić",new DateTime(1992,1,20),new List<int>{5})},
                 {3, new Tuple<string, string, DateTime, List<int>>("Iva","Ivić",new DateTime(2012,9,1),new List<int>{3,4})}
             };
 
-            var trips = new Dictionary<int, Tuple<DateTime,double,double,double,double>>
+        static Dictionary<int, Tuple<DateTime, double, double, double, double>> trips = new Dictionary<int, Tuple<DateTime, double, double, double, double>>
             {
                 {1, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,1,15), 320.5, 24.5, 2.0, 24.5*2.0) },
                 {2, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,2,2), 580.0, 39.0, 1.57, 39.0*1.57) },
@@ -26,12 +22,13 @@ namespace aplikacija
                 {4, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,5,30), 760.128, 51.0, 1.64, 51.0*1.64) },
                 {5, new Tuple<DateTime, double, double, double, double>(new DateTime(2027,7,22), 250.74, 17.5, 1.13, 17.5*1.13) }
             };
-
+        static void Main(string[] args)
+        {
 
             string menu = "";
             do
             {
-        
+
                 Console.WriteLine("APLIKACIJA ZA EVIDENCIJU GORIVA\n1 - Korisnici\r\n2 - Putovanja\r\n0 - Izlaz iz aplikacije\r\n");
 
                 Console.Write("Odabir: ");
@@ -56,11 +53,11 @@ namespace aplikacija
                         break;
                 }
             }
-            while (menu!="0");
+            while (menu != "0");
 
 
 
-            void UserSelector()
+            static void UserSelector()
             {
                 string userMenu = "";
                 do
@@ -74,8 +71,8 @@ namespace aplikacija
                     switch (userMenu)
                     {
                         case "1":
-                            var newUser=UserEntry();
-                            users.Add(users.Keys.Last()+1,newUser);
+                            var newUser = UserEntry();
+                            users.Add(users.Keys.Last() + 1, newUser);
                             Console.WriteLine("Korisnik uspješno dodan.");
                             break;
 
@@ -86,20 +83,21 @@ namespace aplikacija
                                 Console.Write("Unesi 1 za brisanje po ID, 2 za brisanje po punom imenu: ");
                                 type = Console.ReadLine();
                             }
-                            while (type!="1" && type!="2");
-                            
-                            if (DeleteUser(type, users))
+                            while (type != "1" && type != "2");
+
+                            if (DeleteUser(type))
                                 Console.WriteLine("Korisnik izbrisan");
                             else
                                 Console.WriteLine("Korisnik nije pronađen");
-                            
+
                             break;
 
                         case "3":
+                            UpdateUser();
                             break;
 
                         case "4":
-                            UserPrint(users);
+                            UserPrint();
                             break;
 
                         case "0":
@@ -118,7 +116,7 @@ namespace aplikacija
                 Console.Clear();
             }
 
-            void TripSelector()
+            static void TripSelector()
             {
                 string tripMenu = "";
                 do
@@ -140,6 +138,7 @@ namespace aplikacija
                             break;
 
                         case "4":
+                            
                             break;
 
                         case "5":
@@ -158,13 +157,13 @@ namespace aplikacija
                 Console.Clear();
             }
 
-            Tuple<string, string, DateTime, List<int>> UserEntry()
+            static Tuple<string, string, DateTime, List<int>> UserEntry()
             {
                 Console.Write("Unesi ime: ");
-                string firstName=Console.ReadLine();
+                string firstName = Console.ReadLine();
 
                 Console.Write("Unesi prezime: ");
-                string lastName=Console.ReadLine();
+                string lastName = Console.ReadLine();
 
                 DateTime birthDay;
                 while (true)
@@ -176,7 +175,7 @@ namespace aplikacija
                     }
                 }
 
-                List<int> tripIDs=new List<int>();
+                List<int> tripIDs = new List<int>();
 
                 while (tripIDs.Count != trips.Count)
                 {
@@ -194,13 +193,13 @@ namespace aplikacija
                     }
                 }
 
-                var newUser= new Tuple<string,string,DateTime,List<int>>(firstName,lastName,birthDay,tripIDs);
+                var newUser = new Tuple<string, string, DateTime, List<int>>(firstName, lastName, birthDay, tripIDs);
 
                 return newUser;
 
             }
 
-            static void UserPrint(Dictionary<int, Tuple<string, string, DateTime, List<int>>> users)
+            static void UserPrint()
             {
                 Console.WriteLine("\na) Ispis svih korisnika");
                 foreach (var user in users)
@@ -212,21 +211,21 @@ namespace aplikacija
                 foreach (var user in users)
                 {
                     int age = DateTime.Now.Year - user.Value.Item3.Year;
-                    if(age>=20)
+                    if (age >= 20)
                         Console.WriteLine($"{user.Key} - {user.Value.Item1} - {user.Value.Item2} - {user.Value.Item3.ToString("dd/MM/yyyy")}");
                 }
 
                 Console.WriteLine("\nc) Ispis korisnika s barem dva putovanja");
                 foreach (var user in users)
                 {
-                    if (user.Value.Item4.Count>1)
+                    if (user.Value.Item4.Count > 1)
                         Console.WriteLine($"{user.Key} - {user.Value.Item1} - {user.Value.Item2} - {user.Value.Item3.ToString("dd/MM/yyyy")}");
                 }
             }
 
-            static bool DeleteUser(string type, Dictionary<int, Tuple<string, string, DateTime, List<int>>> users)
+            static bool DeleteUser(string type)
             {
-                if (type=="1")
+                if (type == "1")
                 {
                     int id;
                     while (true)
@@ -238,7 +237,7 @@ namespace aplikacija
 
                     foreach (var user in users.Keys)
                     {
-                        if (user==id)
+                        if (user == id)
                         {
                             users.Remove(id);
                             return true;
@@ -246,7 +245,7 @@ namespace aplikacija
                     }
                 }
 
-                else if(type=="2")
+                else if (type == "2")
                 {
                     Console.Write("Unesi ime: ");
                     string firstName = Console.ReadLine();
@@ -256,17 +255,39 @@ namespace aplikacija
 
                     foreach (var user in users)
                     {
-                        if (user.Value.Item1==firstName && user.Value.Item2==lastName)
+                        if (user.Value.Item1 == firstName && user.Value.Item2 == lastName)
                         {
                             users.Remove(user.Key);
                             return true;
                         }
                     }
                 }
-                
+
                 return false;
             }
 
+            static void UpdateUser()
+            {
+                int id;
+                while (true)
+                {
+                    Console.WriteLine("Unesi id korisnika: ");
+                    if (int.TryParse(Console.ReadLine(), out id))
+                        break;
+                }
+
+                foreach (var user in users.Keys)
+                {
+                    if (user == id)
+                    {
+                        var tuple = UserEntry();
+                        users[id] = tuple;
+                        Console.WriteLine("Korisnik uspješno uređen.");
+                        return;
+                    }
+                }
+                Console.WriteLine("Korisnik nije pronađen.");
+            }
         }
     }
 }
