@@ -72,7 +72,8 @@ namespace aplikacija
                     {
                         case "1":
                             var newUser = UserEntry();
-                            users.Add(users.Keys.Last() + 1, newUser);
+                            int id = users.Count == 0 ? 1 : users.Keys.Max() + 1;
+                            users.Add(id, newUser);
                             Console.WriteLine("Korisnik uspješno dodan.");
                             break;
 
@@ -159,11 +160,23 @@ namespace aplikacija
 
             static Tuple<string, string, DateTime, List<int>> UserEntry()
             {
-                Console.Write("Unesi ime: ");
-                string firstName = Console.ReadLine();
+                string firstName = "";
+                do
+                {
+                    Console.Write("Unesi ime: ");
+                    firstName = Console.ReadLine();
+                }
+                while (firstName=="");
 
-                Console.Write("Unesi prezime: ");
-                string lastName = Console.ReadLine();
+
+                string lastName = "";
+                do
+                {
+                    Console.Write("Unesi prezime: ");
+                    lastName = Console.ReadLine();
+                }
+                while (lastName == "");
+
 
                 DateTime birthDay;
                 while (true)
@@ -235,13 +248,10 @@ namespace aplikacija
                             break;
                     }
 
-                    foreach (var user in users.Keys)
+                    if (users.ContainsKey(id))
                     {
-                        if (user == id)
-                        {
-                            users.Remove(id);
-                            return true;
-                        }
+                        users.Remove(id);
+                        return true;
                     }
                 }
 
@@ -276,16 +286,14 @@ namespace aplikacija
                         break;
                 }
 
-                foreach (var user in users.Keys)
+                if (users.ContainsKey(id))
                 {
-                    if (user == id)
-                    {
-                        var tuple = UserEntry();
-                        users[id] = tuple;
-                        Console.WriteLine("Korisnik uspješno uređen.");
-                        return;
-                    }
+                    var tuple = UserEntry();
+                    users[id] = tuple;
+                    Console.WriteLine("Korisnik uspješno uređen.");
+                    return;
                 }
+                
                 Console.WriteLine("Korisnik nije pronađen.");
             }
         }
