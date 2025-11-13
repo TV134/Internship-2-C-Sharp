@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
@@ -122,6 +123,7 @@ namespace aplikacija
                 string tripMenu = "";
                 do
                 {
+                    Console.Clear();
                     Console.WriteLine("1 - Unos novog putovanja\r\n2 - Brisanje putovanja\r\n3 - Uređivanje postojećeg putovanja\r\n4 - Pregled svih putovanja\r\n5 - Izvještaji i analize\r\n0 - Povratak na glavni izbornik\r\n");
 
                     Console.Write("Odabir: ");
@@ -139,7 +141,36 @@ namespace aplikacija
                             break;
 
                         case "4":
-                            
+                            Console.WriteLine("\na) Ispis svih putovanja\nb) Ispis putovanja po trošku uzlazno\nc) Ispis putovanja po trošku silazno\nd) Ispis putovanja po kilometraži uzlazno\ne) Ispis putovanja po kilometraži silazno\nf) Ispis putovanja po datumu uzlazno\ng) Ispis putovanja po datumu silazno");
+                            Console.Write("Odabir: ");
+                            string pickPrint = Console.ReadLine();
+                            switch(pickPrint)
+                            {
+                                case "a":
+                                    TripPrint(trips);
+                                    break;
+                                case "b":
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item5).ToDictionary());
+                                    break;
+                                case "c":
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item5).ToDictionary());
+                                    break;
+                                case "d":
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item2).ToDictionary());
+                                    break;
+                                case "e":
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item2).ToDictionary());
+                                    break;
+                                case "f":
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item1).ToDictionary());
+                                    break;
+                                case "g":
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item1).ToDictionary());
+                                    break;
+                                default:
+                                    Console.WriteLine("Krivi unos");
+                                    break;
+                            }
                             break;
 
                         case "5":
@@ -153,6 +184,9 @@ namespace aplikacija
                             Console.WriteLine("Krivi unos");
                             break;
                     }
+
+                    Console.WriteLine("\nKlikni tipku za nastavak");
+                    Console.ReadKey();
                 }
                 while (tripMenu != "0");
                 Console.Clear();
@@ -166,7 +200,7 @@ namespace aplikacija
                     Console.Write("Unesi ime: ");
                     firstName = Console.ReadLine();
                 }
-                while (firstName=="");
+                while (firstName == "");
 
 
                 string lastName = "";
@@ -293,9 +327,18 @@ namespace aplikacija
                     Console.WriteLine("Korisnik uspješno uređen.");
                     return;
                 }
-                
+
                 Console.WriteLine("Korisnik nije pronađen.");
             }
+
+            static void TripPrint(Dictionary<int, Tuple<DateTime, double, double, double, double>> tripParameter)
+            {
+                foreach (var trip in tripParameter)
+                {
+                    Console.WriteLine($"Putovanje #{trip.Key}\nDatum: {trip.Value.Item1.ToString("dd/MM/yyyy")}\nKilometri: {trip.Value.Item2}\nGorivo: {trip.Value.Item3}L\nCijena po litri: {trip.Value.Item4} EUR\nUkupno: {trip.Value.Item5} EUR\n");
+                }
+            }
+
         }
     }
 }
