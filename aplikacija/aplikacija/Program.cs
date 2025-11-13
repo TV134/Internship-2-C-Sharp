@@ -17,11 +17,11 @@ namespace aplikacija
 
         static Dictionary<int, Tuple<DateTime, double, double, double, double>> trips = new Dictionary<int, Tuple<DateTime, double, double, double, double>>
             {
-                {1, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,1,15), 320.5, 24.5, 2.0, 24.5*2.0) },
-                {2, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,2,2), 580.0, 39.0, 1.57, 39.0*1.57) },
-                {3, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,4,13), 145.25, 10.2, 0.99,10.2*0.99) },
-                {4, new Tuple<DateTime, double, double, double, double>(new DateTime(2026,5,30), 760.128, 51.0, 1.64, 51.0*1.64) },
-                {5, new Tuple<DateTime, double, double, double, double>(new DateTime(2027,7,22), 250.74, 17.5, 1.13, 17.5*1.13) }
+                {1, new Tuple<DateTime, double, double, double, double>(new DateTime(2023,1,15), 320.5, 24.5, 2.0, 24.5*2.0) },
+                {2, new Tuple<DateTime, double, double, double, double>(new DateTime(2024,2,2), 580.0, 39.0, 1.57, 39.0*1.57) },
+                {3, new Tuple<DateTime, double, double, double, double>(new DateTime(2022,4,13), 145.25, 10.2, 0.99,10.2*0.99) },
+                {4, new Tuple<DateTime, double, double, double, double>(new DateTime(2024,5,30), 760.128, 51.0, 1.64, 51.0*1.64) },
+                {5, new Tuple<DateTime, double, double, double, double>(new DateTime(2024,7,22), 250.74, 17.5, 1.13, 17.5*1.13) }
             };
         static void Main(string[] args)
         {
@@ -79,6 +79,17 @@ namespace aplikacija
                             break;
 
                         case "2":
+
+                            var confirmDelete= "";
+                            do
+                            {
+                                Console.Write("Želiš li izbrisati korisnika? (Y/N): ");
+                                confirmDelete = Console.ReadLine().ToUpper();
+                            }while (confirmDelete != "Y" && confirmDelete != "N");
+
+                            if (confirmDelete == "N")
+                                break;
+                            
                             string type = "";
                             do
                             {
@@ -95,6 +106,16 @@ namespace aplikacija
                             break;
 
                         case "3":
+                            var confirmEdit = "";
+                            do
+                            {
+                                Console.Write("Želiš li urediti korisnika? (Y/N): ");
+                                confirmEdit = Console.ReadLine().ToUpper();
+                            } while (confirmEdit != "Y" && confirmEdit != "N");
+
+                            if (confirmEdit == "N")
+                                break;
+
                             UpdateUser();
                             break;
 
@@ -132,6 +153,19 @@ namespace aplikacija
                     switch (tripMenu)
                     {
                         case "1":
+                            var newTrip = TripEntry();
+                            int tripId = trips.Count == 0 ? 1 : trips.Keys.Max() + 1;
+                            trips.Add(tripId, newTrip);
+                            int userId;
+                            bool validUser = false;
+                            do
+                            {
+                                Console.Write("Unesi korisnika kojem ćeš dodati putovanje: ");
+                                validUser= int.TryParse(Console.ReadLine(), out userId);
+                            }
+                            while (!users.ContainsKey(userId) || !validUser);
+                            users[userId].Item4.Add(tripId);
+                            Console.WriteLine("Putovanje uspješno dodano.");
                             break;
 
                         case "2":
@@ -235,9 +269,8 @@ namespace aplikacija
                         }
                     }
                     else
-                    {
                         break;
-                    }
+                    
                 }
 
                 var newUser = new Tuple<string, string, DateTime, List<int>>(firstName, lastName, birthDay, tripIDs);
@@ -338,6 +371,53 @@ namespace aplikacija
                     Console.WriteLine($"Putovanje #{trip.Key}\nDatum: {trip.Value.Item1.ToString("dd/MM/yyyy")}\nKilometri: {trip.Value.Item2}\nGorivo: {trip.Value.Item3}L\nCijena po litri: {trip.Value.Item4} EUR\nUkupno: {trip.Value.Item5} EUR\n");
                 }
             }
+
+            static Tuple<DateTime, double, double, double, double> TripEntry()
+            {
+                DateTime travelDate;
+                bool validDate = false;
+                do
+                {
+                    Console.Write("Unesi datum putovanja (YYYY/MM/DD): ");
+                    validDate = DateTime.TryParse(Console.ReadLine(), out travelDate);
+                }
+                while (!validDate || travelDate.Year < 2025);
+            
+
+                double kilometers;
+                double fuel;
+                double price;
+
+                while (true)
+                {
+                    Console.Write("Unesi prijeđene kilometre: ");
+                    if (double.TryParse(Console.ReadLine(), out kilometers) && kilometers > 0)
+                        break;    
+                }
+
+                while (true)
+                {
+                    Console.Write("Unesi količinu potrošenog goriva: ");
+                    if (double.TryParse(Console.ReadLine(), out fuel) && fuel > 0)
+                        break;
+                }
+
+                while (true)
+                {
+                    Console.Write("Unesi cijenu goriva po litri: ");
+                    if (double.TryParse(Console.ReadLine(), out price) && price > 0)
+                        break;
+                }
+
+                var newTrip = new Tuple<DateTime, double, double, double, double>(travelDate, kilometers, fuel, price, TotalPrice(fuel, price));
+                return newTrip;
+            }
+
+            static double TotalPrice(double fuel, double price)
+            {
+                return fuel*price;
+            }
+
 
         }
     }
