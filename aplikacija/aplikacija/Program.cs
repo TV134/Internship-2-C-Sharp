@@ -169,6 +169,29 @@ namespace aplikacija
                             break;
 
                         case "2":
+                            var confirmDelete = "";
+                            do
+                            {
+                                Console.Write("Želiš li izbrisati putovanje? (Y/N): ");
+                                confirmDelete = Console.ReadLine().ToUpper();
+                            } while (confirmDelete != "Y" && confirmDelete != "N");
+
+                            if (confirmDelete == "N")
+                                break;
+
+                            string type = "";
+                            do
+                            {
+                                Console.Write("1-brisanje po ID, 2-brisanje skupljih troškova od unesenog iznoa, 3-brisanje jeftinijih troškova: ");
+                                type = Console.ReadLine();
+                            }
+                            while (type != "1" && type != "2" && type!="3");
+
+                            if (DeleteTrip(type))
+                                Console.WriteLine("Putovanje izbrisano");
+                            else
+                                Console.WriteLine("Putovanje nije pronađeno");
+
                             break;
 
                         case "3":
@@ -418,7 +441,56 @@ namespace aplikacija
                 return fuel*price;
             }
 
+            static bool DeleteTrip(string type)
+            {
+                List<int> toDelete = new List<int>();
+                if (type == "1")
+                {
+                    int id;
+                    while (true)
+                    {
+                        Console.WriteLine("Unesi id putovanja: ");
+                        if (int.TryParse(Console.ReadLine(), out id))
+                            break;
+                    }
 
+                    if (trips.ContainsKey(id))
+                    {
+                        toDelete.Add(id);
+                    }
+                }
+                else
+                { 
+                    double budget;
+
+                    while (true)
+                    {
+                        Console.Write("Unesi iznos troška: ");
+                        if (double.TryParse(Console.ReadLine(), out budget))
+                            break;
+                    }
+
+                    foreach (var trip in trips)
+                    {
+                        var total= trip.Value.Item5;
+                        if ((total > budget && type=="2") || (total<budget && type=="3"))
+                        {
+                            toDelete.Add(trip.Key);
+                        }
+                    }
+                }
+
+                foreach (var IDs in toDelete)
+                {
+                    trips.Remove(IDs);
+                    foreach (var user in users)
+                    {
+                        user.Value.Item4.Remove(IDs);
+                    }
+                }
+
+                return toDelete.Count>0;
+            }
         }
     }
 }
