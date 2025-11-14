@@ -244,6 +244,7 @@ namespace aplikacija
                             break;
 
                         case "5":
+                            TripAnalysis();
                             break;
 
                         case "0":
@@ -316,8 +317,9 @@ namespace aplikacija
 
             static void UserPrint()
             {
-                Console.WriteLine("\na) Ispis svih korisnika");
-                foreach (var user in users)
+                var usersInOrder = users.OrderBy(user => user.Value.Item2).ToDictionary();
+                Console.WriteLine("\na) Ispis svih korisnika po abecedi");
+                foreach (var user in usersInOrder)
                 {
                     Console.WriteLine($"{user.Key} - {user.Value.Item1} - {user.Value.Item2} - {user.Value.Item3.ToString("dd/MM/yyyy")}");
                 }
@@ -525,8 +527,96 @@ namespace aplikacija
                 Console.WriteLine("Putovanje nije pronađeno.");
             }
 
+            static void TripAnalysis()
+            {
+                int userId;
+                bool validUser = false;
+                do
+                {
+                    Console.Write("Odaberi id korisnika: ");
+                    validUser = int.TryParse(Console.ReadLine(), out userId);
+                }
+                while (!users.ContainsKey(userId) || !validUser);
 
 
+                List<int> userTrips = users[userId].Item4;
+
+                if(userTrips.Count == 0)
+                {
+                    Console.WriteLine("Korisnik nema evidentiranih putovanja.");
+                    return;
+                }
+
+                double totalFuelConsumed = 0;
+                double totalPrice = 0;
+                double totalKilometers = 0;
+                double maxFuel = double.MinValue;
+                int longestTripID=0;
+
+                foreach (var tripID in userTrips)
+                {
+                    var fuel = trips[tripID].Item3;
+                    var price = trips[tripID].Item5;
+                    var kilometers = trips[tripID].Item2;
+
+                    totalFuelConsumed += fuel;
+                    totalPrice += price;
+                    totalKilometers += kilometers;
+
+                    if (maxFuel<fuel)
+                    {
+                        maxFuel= fuel;
+                        longestTripID= tripID;
+                    }
+                }
+
+                var averageConsumption = (totalFuelConsumed / totalKilometers) * 100;
+
+                Console.WriteLine("Ukupna potrošnja goriva - {0} L",totalFuelConsumed);
+                Console.WriteLine("Ukupni trošak goriva - {0} EUR",totalPrice);
+                Console.WriteLine("Prosječna potrošnja goriva {0:F2} L/100km",averageConsumption);
+                Console.WriteLine("Putovanje #{0} ima najveću potrošnju goriva", longestTripID);
+
+                var sameDateTrips = SameDateTrips();
+                if (sameDateTrips.Count<1)
+                {
+                    Console.WriteLine("Nema putovanja na unsesnom datum.");
+                    return;
+                }
+                
+                Console.WriteLine("Putovanja koja su se dogodila na uneseni datum:");
+                TripPrint(sameDateTrips);
+               
+                
+            }
+
+            static Dictionary<int, Tuple<DateTime, double, double, double, double>> SameDateTrips()
+            { 
+                var foundTrips= new List<int>();
+
+                DateTime travelDate;
+                bool validDate = false;
+                do
+                {
+                    Console.Write("Unesi datum putovanja (YYYY/MM/DD): ");
+                    validDate = DateTime.TryParse(Console.ReadLine(), out travelDate);
+                } while (!validDate);
+
+                foreach (var trip in trips.Keys)
+                {
+                    var date = trips[trip].Item1;
+                    if (date == travelDate)
+                        foundTrips.Add(trip);
+                }
+
+                var dictTrips = new Dictionary<int, Tuple<DateTime, double, double, double, double>>();
+                foreach (var trip in foundTrips)
+                {
+                    dictTrips.Add(trip, trips[trip]);
+                }
+
+                return dictTrips;
+            }
         }
     }
 }
