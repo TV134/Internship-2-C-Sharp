@@ -10,9 +10,9 @@ namespace aplikacija
     {
         static Dictionary<int, Tuple<string, string, DateTime, List<int>>> users = new Dictionary<int, Tuple<string, string, DateTime, List<int>>>
             {
-                {1, new Tuple<string, string, DateTime, List<int>>("Ana","Anić",new DateTime(2000,12,15),new List<int>{1,2,3})},
-                {2, new Tuple<string, string, DateTime, List<int>>("Mate","Matić",new DateTime(1992,1,20),new List<int>{5})},
-                {3, new Tuple<string, string, DateTime, List<int>>("Iva","Ivić",new DateTime(2012,9,1),new List<int>{3,4})}
+                {1, new Tuple<string, string, DateTime, List<int>>("Ana","Anic",new DateTime(2000,12,15),new List<int>{1,2,3})},
+                {2, new Tuple<string, string, DateTime, List<int>>("Mate","Matic",new DateTime(1992,1,20),new List<int>{5})},
+                {3, new Tuple<string, string, DateTime, List<int>>("Iva","Ivic",new DateTime(2012,9,1),new List<int>{3,4})}
             };
 
         static Dictionary<int, Tuple<DateTime, double, double, double, double>> trips = new Dictionary<int, Tuple<DateTime, double, double, double, double>>
@@ -80,16 +80,9 @@ namespace aplikacija
 
                         case "2":
 
-                            var confirmDelete= "";
-                            do
-                            {
-                                Console.Write("Želiš li izbrisati korisnika? (Y/N): ");
-                                confirmDelete = Console.ReadLine().ToUpper();
-                            }while (confirmDelete != "Y" && confirmDelete != "N");
-
-                            if (confirmDelete == "N")
+                            if (!Confirm("Želiš li izbrisati korisnika?"))
                                 break;
-                            
+
                             string type = "";
                             do
                             {
@@ -106,14 +99,7 @@ namespace aplikacija
                             break;
 
                         case "3":
-                            var confirmEdit = "";
-                            do
-                            {
-                                Console.Write("Želiš li urediti korisnika? (Y/N): ");
-                                confirmEdit = Console.ReadLine().ToUpper();
-                            } while (confirmEdit != "Y" && confirmEdit != "N");
-
-                            if (confirmEdit == "N")
+                            if (!Confirm("Želiš li urediti korisnika?"))
                                 break;
 
                             UpdateUser();
@@ -157,26 +143,18 @@ namespace aplikacija
                             int tripId = trips.Count == 0 ? 1 : trips.Keys.Max() + 1;
                             trips.Add(tripId, newTrip);
                             int userId;
-                            bool validUser = false;
                             do
                             {
-                                Console.Write("Unesi korisnika kojem ćeš dodati putovanje: ");
-                                validUser= int.TryParse(Console.ReadLine(), out userId);
+                                userId = GetId("korisnika");
                             }
-                            while (!users.ContainsKey(userId) || !validUser);
+                            while (!users.ContainsKey(userId));
                             users[userId].Item4.Add(tripId);
                             Console.WriteLine("Putovanje uspješno dodano.");
                             break;
 
                         case "2":
-                            var confirmDelete = "";
-                            do
-                            {
-                                Console.Write("Želiš li izbrisati putovanje? (Y/N): ");
-                                confirmDelete = Console.ReadLine().ToUpper();
-                            } while (confirmDelete != "Y" && confirmDelete != "N");
 
-                            if (confirmDelete == "N")
+                            if (!Confirm("Želiš li izbrisati putovanje?"))
                                 break;
 
                             string type = "";
@@ -185,7 +163,7 @@ namespace aplikacija
                                 Console.Write("1-brisanje po ID, 2-brisanje skupljih troškova od unesenog iznoa, 3-brisanje jeftinijih troškova: ");
                                 type = Console.ReadLine();
                             }
-                            while (type != "1" && type != "2" && type!="3");
+                            while (type != "1" && type != "2" && type != "3");
 
                             if (DeleteTrip(type))
                                 Console.WriteLine("Putovanje izbrisano");
@@ -196,14 +174,7 @@ namespace aplikacija
 
                         case "3":
 
-                            var confirmEdit = "";
-                            do
-                            {
-                                Console.Write("Želiš li urediti putovanje? (Y/N): ");
-                                confirmEdit = Console.ReadLine().ToUpper();
-                            } while (confirmEdit != "Y" && confirmEdit != "N");
-
-                            if (confirmEdit == "N")
+                            if (!Confirm("Želiš li urediti putovanje?"))
                                 break;
 
                             UpdateTrip();
@@ -214,7 +185,7 @@ namespace aplikacija
                             Console.WriteLine("\na) Ispis svih putovanja\nb) Ispis putovanja po trošku uzlazno\nc) Ispis putovanja po trošku silazno\nd) Ispis putovanja po kilometraži uzlazno\ne) Ispis putovanja po kilometraži silazno\nf) Ispis putovanja po datumu uzlazno\ng) Ispis putovanja po datumu silazno");
                             Console.Write("Odabir: ");
                             string pickPrint = Console.ReadLine();
-                            switch(pickPrint)
+                            switch (pickPrint)
                             {
                                 case "a":
                                     TripPrint(trips);
@@ -290,7 +261,7 @@ namespace aplikacija
                     Console.Write("Unesi datum rođenja (YYYY/MM/DD): ");
                     validDate = DateTime.TryParse(Console.ReadLine(), out birthDay);
                 }
-                while (!validDate || (birthDay >= DateTime.Now || birthDay.Year<1930));
+                while (!validDate || (birthDay >= DateTime.Now || birthDay.Year < 1930));
 
                 List<int> tripIDs = new List<int>();
 
@@ -306,7 +277,7 @@ namespace aplikacija
                     }
                     else
                         break;
-                    
+
                 }
 
                 var newUser = new Tuple<string, string, DateTime, List<int>>(firstName, lastName, birthDay, tripIDs);
@@ -342,21 +313,10 @@ namespace aplikacija
 
             static bool DeleteUser(string type)
             {
+                int id = 0;
                 if (type == "1")
                 {
-                    int id;
-                    while (true)
-                    {
-                        Console.WriteLine("Unesi id korisnika: ");
-                        if (int.TryParse(Console.ReadLine(), out id))
-                            break;
-                    }
-
-                    if (users.ContainsKey(id))
-                    {
-                        users.Remove(id);
-                        return true;
-                    }
+                    id=GetId("korisnika");
                 }
 
                 else if (type == "2")
@@ -371,10 +331,16 @@ namespace aplikacija
                     {
                         if (user.Value.Item1 == firstName && user.Value.Item2 == lastName)
                         {
-                            users.Remove(user.Key);
-                            return true;
+                            id=user.Key;
+                            break;
                         }
                     }
+                }
+
+                if (users.ContainsKey(id))
+                {
+                    users.Remove(id);
+                    return true;
                 }
 
                 return false;
@@ -382,13 +348,7 @@ namespace aplikacija
 
             static void UpdateUser()
             {
-                int id;
-                while (true)
-                {
-                    Console.WriteLine("Unesi id korisnika: ");
-                    if (int.TryParse(Console.ReadLine(), out id))
-                        break;
-                }
+                int id=GetId("korisnika");
 
                 if (users.ContainsKey(id))
                 {
@@ -419,7 +379,7 @@ namespace aplikacija
                     validDate = DateTime.TryParse(Console.ReadLine(), out travelDate);
                 }
                 while (!validDate || travelDate.Year > 2025 || travelDate.Year < 1930);
-            
+
 
                 double kilometers;
                 double fuel;
@@ -429,7 +389,7 @@ namespace aplikacija
                 {
                     Console.Write("Unesi prijeđene kilometre: ");
                     if (double.TryParse(Console.ReadLine(), out kilometers) && kilometers > 0)
-                        break;    
+                        break;
                 }
 
                 while (true)
@@ -452,7 +412,7 @@ namespace aplikacija
 
             static double TotalPrice(double fuel, double price)
             {
-                return fuel*price;
+                return fuel * price;
             }
 
             static bool DeleteTrip(string type)
@@ -460,13 +420,7 @@ namespace aplikacija
                 List<int> toDelete = new List<int>();
                 if (type == "1")
                 {
-                    int id;
-                    while (true)
-                    {
-                        Console.WriteLine("Unesi id putovanja: ");
-                        if (int.TryParse(Console.ReadLine(), out id))
-                            break;
-                    }
+                    int id=GetId("putovanja");
 
                     if (trips.ContainsKey(id))
                     {
@@ -474,7 +428,7 @@ namespace aplikacija
                     }
                 }
                 else
-                { 
+                {
                     double budget;
 
                     while (true)
@@ -486,8 +440,8 @@ namespace aplikacija
 
                     foreach (var trip in trips)
                     {
-                        var total= trip.Value.Item5;
-                        if ((total > budget && type=="2") || (total<budget && type=="3"))
+                        var total = trip.Value.Item5;
+                        if ((total > budget && type == "2") || (total < budget && type == "3"))
                         {
                             toDelete.Add(trip.Key);
                         }
@@ -503,18 +457,12 @@ namespace aplikacija
                     }
                 }
 
-                return toDelete.Count>0;
+                return toDelete.Count > 0;
             }
 
             static void UpdateTrip()
             {
-                int id;
-                while (true)
-                {
-                    Console.WriteLine("Unesi id putovanja: ");
-                    if (int.TryParse(Console.ReadLine(), out id))
-                        break;
-                }
+                int id=GetId("putovanja");
 
                 if (trips.ContainsKey(id))
                 {
@@ -530,18 +478,16 @@ namespace aplikacija
             static void TripAnalysis()
             {
                 int userId;
-                bool validUser = false;
                 do
                 {
-                    Console.Write("Odaberi id korisnika: ");
-                    validUser = int.TryParse(Console.ReadLine(), out userId);
+                    userId = GetId("korisnika");
                 }
-                while (!users.ContainsKey(userId) || !validUser);
+                while (!users.ContainsKey(userId));
 
 
                 List<int> userTrips = users[userId].Item4;
 
-                if(userTrips.Count == 0)
+                if (userTrips.Count == 0)
                 {
                     Console.WriteLine("Korisnik nema evidentiranih putovanja.");
                     return;
@@ -551,7 +497,7 @@ namespace aplikacija
                 double totalPrice = 0;
                 double totalKilometers = 0;
                 double maxFuel = double.MinValue;
-                int longestTripID=0;
+                int longestTripID = 0;
 
                 foreach (var tripID in userTrips)
                 {
@@ -563,36 +509,36 @@ namespace aplikacija
                     totalPrice += price;
                     totalKilometers += kilometers;
 
-                    if (maxFuel<fuel)
+                    if (maxFuel < fuel)
                     {
-                        maxFuel= fuel;
-                        longestTripID= tripID;
+                        maxFuel = fuel;
+                        longestTripID = tripID;
                     }
                 }
 
                 var averageConsumption = (totalFuelConsumed / totalKilometers) * 100;
 
-                Console.WriteLine("Ukupna potrošnja goriva - {0} L",totalFuelConsumed);
-                Console.WriteLine("Ukupni trošak goriva - {0} EUR",totalPrice);
-                Console.WriteLine("Prosječna potrošnja goriva {0:F2} L/100km",averageConsumption);
+                Console.WriteLine("Ukupna potrošnja goriva - {0} L", totalFuelConsumed);
+                Console.WriteLine("Ukupni trošak goriva - {0} EUR", totalPrice);
+                Console.WriteLine("Prosječna potrošnja goriva {0:F2} L/100km", averageConsumption);
                 Console.WriteLine("Putovanje #{0} ima najveću potrošnju goriva", longestTripID);
 
                 var sameDateTrips = SameDateTrips();
-                if (sameDateTrips.Count<1)
+                if (sameDateTrips.Count < 1)
                 {
-                    Console.WriteLine("Nema putovanja na unsesnom datum.");
+                    Console.WriteLine("Nema putovanja na unesenom datum.");
                     return;
                 }
-                
+
                 Console.WriteLine("Putovanja koja su se dogodila na uneseni datum:");
                 TripPrint(sameDateTrips);
-               
-                
+
+
             }
 
             static Dictionary<int, Tuple<DateTime, double, double, double, double>> SameDateTrips()
-            { 
-                var foundTrips= new List<int>();
+            {
+                var foundTrips = new List<int>();
 
                 DateTime travelDate;
                 bool validDate = false;
@@ -617,6 +563,33 @@ namespace aplikacija
 
                 return dictTrips;
             }
+
+
+            static bool Confirm(string question)
+            {
+                string confirm = "";
+                do
+                {
+                    Console.Write($"{question} (Y/N): ");
+                    confirm = Console.ReadLine().ToUpper();
+                } while (confirm != "Y" && confirm != "N");
+                return confirm == "Y";
+            }
+
+            static int GetId(string type)
+            {
+                int id;
+                while (true)
+                {
+                    Console.Write("Unesi id {0}: ",type);
+                    if (int.TryParse(Console.ReadLine(), out id))
+                        break;
+                }
+                return id;
+            }
+
+
+
         }
     }
 }
