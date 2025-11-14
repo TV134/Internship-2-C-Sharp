@@ -195,6 +195,19 @@ namespace aplikacija
                             break;
 
                         case "3":
+
+                            var confirmEdit = "";
+                            do
+                            {
+                                Console.Write("Želiš li urediti putovanje? (Y/N): ");
+                                confirmEdit = Console.ReadLine().ToUpper();
+                            } while (confirmEdit != "Y" && confirmEdit != "N");
+
+                            if (confirmEdit == "N")
+                                break;
+
+                            UpdateTrip();
+
                             break;
 
                         case "4":
@@ -270,14 +283,13 @@ namespace aplikacija
 
 
                 DateTime birthDay;
-                while (true)
+                bool validDate = false;
+                do
                 {
                     Console.Write("Unesi datum rođenja (YYYY/MM/DD): ");
-                    if (DateTime.TryParse(Console.ReadLine(), out birthDay))
-                    {
-                        break;
-                    }
+                    validDate = DateTime.TryParse(Console.ReadLine(), out birthDay);
                 }
+                while (!validDate || (birthDay >= DateTime.Now || birthDay.Year<1930));
 
                 List<int> tripIDs = new List<int>();
 
@@ -404,7 +416,7 @@ namespace aplikacija
                     Console.Write("Unesi datum putovanja (YYYY/MM/DD): ");
                     validDate = DateTime.TryParse(Console.ReadLine(), out travelDate);
                 }
-                while (!validDate || travelDate.Year < 2025);
+                while (!validDate || travelDate.Year > 2025 || travelDate.Year < 1930);
             
 
                 double kilometers;
@@ -491,6 +503,30 @@ namespace aplikacija
 
                 return toDelete.Count>0;
             }
+
+            static void UpdateTrip()
+            {
+                int id;
+                while (true)
+                {
+                    Console.WriteLine("Unesi id putovanja: ");
+                    if (int.TryParse(Console.ReadLine(), out id))
+                        break;
+                }
+
+                if (trips.ContainsKey(id))
+                {
+                    var tuple = TripEntry();
+                    trips[id] = tuple;
+                    Console.WriteLine("Putovanje uspješno uređeno.");
+                    return;
+                }
+
+                Console.WriteLine("Putovanje nije pronađeno.");
+            }
+
+
+
         }
     }
 }
