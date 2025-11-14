@@ -191,22 +191,22 @@ namespace aplikacija
                                     TripPrint(trips);
                                     break;
                                 case "b":
-                                    TripPrint(trips.OrderBy(trip => trip.Value.Item5).ToDictionary());
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item5).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 case "c":
-                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item5).ToDictionary());
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item5).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 case "d":
-                                    TripPrint(trips.OrderBy(trip => trip.Value.Item2).ToDictionary());
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item2).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 case "e":
-                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item2).ToDictionary());
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item2).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 case "f":
-                                    TripPrint(trips.OrderBy(trip => trip.Value.Item1).ToDictionary());
+                                    TripPrint(trips.OrderBy(trip => trip.Value.Item1).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 case "g":
-                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item1).ToDictionary());
+                                    TripPrint(trips.OrderByDescending(trip => trip.Value.Item1).ToDictionary(trip => trip.Key, trip => trip.Value));
                                     break;
                                 default:
                                     Console.WriteLine("Krivi unos");
@@ -288,7 +288,7 @@ namespace aplikacija
 
             static void UserPrint()
             {
-                var usersInOrder = users.OrderBy(user => user.Value.Item2).ToDictionary();
+                var usersInOrder = users.OrderBy(user => user.Value.Item2).ToDictionary(user => user.Key, user => user.Value);
                 Console.WriteLine("\na) Ispis svih korisnika po abecedi");
                 foreach (var user in usersInOrder)
                 {
@@ -587,9 +587,6 @@ namespace aplikacija
                 }
                 return id;
             }
-
-
-
         }
     }
 }
